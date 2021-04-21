@@ -80,18 +80,21 @@ namespace StopwatcchWPF {
         }
 
         private void button3_Click(object sender, RoutedEventArgs e) {
-            if (mode != StopwatchMode.Stopwatch) return;
-            tsl.Add(ts);
-            TimeSpan tmp = new TimeSpan(0);
-            if (tsl.Count <= 1) {
-                tmp = tsl[tsl.Count - 1];
+            if (mode != StopwatchMode.Stopwatch) {
+                vm.LAPs.Clear();
             } else {
-                tmp = tsl[tsl.Count - 1] - tsl[tsl.Count - 2];
+                tsl.Add(ts);
+                TimeSpan tmp = new TimeSpan(0);
+                if (tsl.Count <= 1) {
+                    tmp = tsl[tsl.Count - 1];
+                } else {
+                    tmp = tsl[tsl.Count - 1] - tsl[tsl.Count - 2];
+                }
+                var lap = new LAP();
+                lap.Time = String.Format("{0:D2}:{1:D2}:{2:D2}.{3:D3}", now.Hour, now.Minute, now.Second, now.Millisecond);
+                lap.LAPTime = String.Format("{0:D2}:{1:D2}:{2:D2}.{3:D3}", tmp.Hours, tmp.Minutes, tmp.Seconds, tmp.Milliseconds);
+                vm.LAPs.Add(lap);
             }
-            var lap = new LAP();
-            lap.Time = String.Format("{0:D2}:{1:D2}:{2:D2}.{3:D3}", now.Hour, now.Minute, now.Second, now.Millisecond);
-            lap.LAPTime = String.Format("{0:D2}:{1:D2}:{2:D2}.{3:D3}", tmp.Hours, tmp.Minutes, tmp.Seconds, tmp.Milliseconds);
-            vm.LAPs.Add(lap);
         }
     }
     public class ViewModel : INotifyPropertyChanged {
