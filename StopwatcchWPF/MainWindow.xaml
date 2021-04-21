@@ -21,7 +21,7 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" x:Name="button1" Content="Start" Click="button1_Click"/>
             <Button Grid.Column="1" x:Name="button2" Content="Stop" Height="30" VerticalAlignment="Top" Click="button2_Click"/>
-            <Button Grid.Column="2" x:Name="button3" Content="LAP" Click="button3_Click"/>
+            <Button Grid.Column="2" x:Name="button3" Content="{Binding LAPText}" Click="button3_Click"/>
         </Grid>
         <DataGrid Grid.Row="2" ItemsSource="{Binding LAPs}" AutoGenerateColumns="False" CanUserAddRows="False">
             <DataGrid.Columns>

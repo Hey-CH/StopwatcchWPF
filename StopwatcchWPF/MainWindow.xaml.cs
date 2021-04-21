@@ -26,12 +26,6 @@ namespace StopwatcchWPF {
         BackgroundWorker bw;
         TimeSpan ts;
         List<TimeSpan> tsl = new List<TimeSpan>();
-        enum StopwatchMode {
-            Time,
-            Stopwatch,
-            Pause
-        }
-        StopwatchMode mode = StopwatchMode.Time;
         public MainWindow() {
             InitializeComponent();
             vm = new ViewModel();
@@ -44,16 +38,16 @@ namespace StopwatcchWPF {
         private void Bw_DoWork(object sender, DoWorkEventArgs e) {
             while (true) {
                 now = DateTime.Now;
-                if (mode == StopwatchMode.Stopwatch) {
+                if (vm.Mode == ViewModel.StopwatchMode.Stopwatch) {
                     ts = now - startTime;
                     try {
                         vm.Time = String.Format("{0:D2}:{1:D2}:{2:D2}.{3:D3}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
                     } catch (Exception ex) { }
-                } else if (mode == StopwatchMode.Time) {
+                } else if (vm.Mode == ViewModel.StopwatchMode.Time) {
                     try {
                         vm.Time = String.Format("{0:D2}:{1:D2}:{2:D2}", now.Hour, now.Minute, now.Second, now.Millisecond);
                     } catch (Exception ex) { }
-                } else if (mode == StopwatchMode.Pause) {
+                } else if (vm.Mode == ViewModel.StopwatchMode.Pause) {
                     //何もしない
                 }
             }
@@ -61,28 +55,28 @@ namespace StopwatcchWPF {
 
         private void button1_Click(object sender, RoutedEventArgs e) {
             if ((string)button1.Content == "Start") {
-                if (mode != StopwatchMode.Pause) {
+                if (vm.Mode != ViewModel.StopwatchMode.Pause) {
                     startTime = DateTime.Now;
-                } else if (mode == StopwatchMode.Pause) {
+                } else if (vm.Mode == ViewModel.StopwatchMode.Pause) {
                     startTime = DateTime.Now - ts;
                 }
-                mode = StopwatchMode.Stopwatch;
+                vm.Mode = ViewModel.StopwatchMode.Stopwatch;
                 button1.Content = "Pause";
             } else {
-                mode = StopwatchMode.Pause;
+                vm.Mode = ViewModel.StopwatchMode.Pause;
                 button1.Content = "Start";
             }
         }
 
         private void button2_Click(object sender, RoutedEventArgs e) {
-            mode = StopwatchMode.Time;
+            vm.Mode = ViewModel.StopwatchMode.Time;
             button1.Content = "Start";
         }
 
         private void button3_Click(object sender, RoutedEventArgs e) {
-            if (mode != StopwatchMode.Stopwatch) {
+            if (vm.Mode == ViewModel.StopwatchMode.Time) {
                 vm.LAPs.Clear();
-            } else {
+            } else if (vm.Mode == ViewModel.StopwatchMode.Stopwatch) {
                 tsl.Add(ts);
                 TimeSpan tmp = new TimeSpan(0);
                 if (tsl.Count <= 1) {
@@ -103,12 +97,26 @@ namespace StopwatcchWPF {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
+        public enum StopwatchMode {
+            Time,
+            Stopwatch,
+            Pause
+        }
+        StopwatchMode _Mode = StopwatchMode.Time;
+        public StopwatchMode Mode {
+            get { return _Mode; }
+            set {
+                _Mode = value;
+                RaisePropertyChanged("Mode");
+            }
+        }
         string _Time = "00:00:00.000";
         public string Time {
             get { return _Time; }
             set {
                 _Time = value;
                 RaisePropertyChanged("Time");
+                RaisePropertyChanged("LAPText");
             }
         }
         ObservableCollection<LAP> _LAPs = new ObservableCollection<LAP>();
@@ -117,6 +125,14 @@ namespace StopwatcchWPF {
             set {
                 _LAPs = value;
                 RaisePropertyChanged("LAPs");
+            }
+        }
+        public string LAPText {
+            get {
+                if (Mode == StopwatchMode.Time && LAPs.Count > 0) {
+                    return "C LAP";
+                } else
+                    return "LAP";
             }
         }
     }
